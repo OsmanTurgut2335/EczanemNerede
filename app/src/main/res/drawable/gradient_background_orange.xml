@@ -1,0 +1,11 @@
+<!--  res/drawable/gradient_background_orange.xml  -->
+<shape xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android" tools:ignore="ExtraText">
+    <gradient android:startColor="#FF9800"/>
+    <!--  Orange  -->
+    android:endColor="#F44336"
+    <!--  Red  -->
+    android:angle="135" />
+    <!--  Gradient angle  -->
+    <corners android:radius="8dp"/>
+    <!--  Rounded corners with 8dp radius  -->
+</shape>

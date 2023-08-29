@@ -1,0 +1,7 @@
+<!--  res/drawable/slightly_less_green_background.xml  -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#66BB33"/>
+    <!--  Slightly less intense green solid color background  -->
+    <corners android:radius="16dp"/>
+    <!--  Rounded corners with 16dp radius  -->
+</shape>
