@@ -26,37 +26,34 @@
             android:layout_marginTop="176dp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.476"
-            app:layout_constraintStart_toStartOf="@+id/guideline"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_begin="205dp" />
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="195dp"
+            android:layout_width="match_parent"
             android:layout_height="126dp"
+
+
+            android:layout_marginTop="68dp"
             android:background="@drawable/yellowbackground"
             android:gravity="center"
-            android:onClick="allBtnClicked"
-            android:text="Tüm Eczaneler"
-            android:textStyle="bold"
 
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            android:onClick="allBtnClicked"
+
+            android:text="Tüm Eczaneler"
+
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5" />
+            app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
         <TextView
             android:id="@+id/locationPharmaciesText"
-            android:layout_width="167dp"
+            android:layout_width="match_parent"
             android:layout_height="129dp"
+
+            android:layout_marginBottom="160dp"
             android:background="@drawable/yellowbackground"
             android:gravity="center"
             android:onClick="locationClicked"
@@ -64,9 +61,8 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5" />
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/textView3"
