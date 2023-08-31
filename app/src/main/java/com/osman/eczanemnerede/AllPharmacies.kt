@@ -3,6 +3,8 @@ package com.osman.eczanemnerede
 import android.content.res.Resources
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.BufferedReader
@@ -11,37 +13,45 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
 
-class AllPharmacies : ComponentActivity() {
-
+class AllPharmacies : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: CSVAdapter
+    private lateinit var adapter: GroupedCSVAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pharmacies)
 
-
+        val layoutManager = LinearLayoutManager(this)
         recyclerView = findViewById(R.id.recyclerViewAllPharmacies)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        val reader = createCSVReader()
-        val pharmacies = parseCSVData(reader).sortedBy { it.eczaneAdi }
-       // Parse your CSV data into a list of CSVDataModel objects
+        recyclerView.layoutManager = layoutManager
 
-        adapter = CSVAdapter(pharmacies)
+        val dataList = parseCSVData()
+        val groupedData = groupPharmaciesByNeighborhood(dataList)
+
+        adapter = GroupedCSVAdapter(groupedData)
         recyclerView.adapter = adapter
+
+        val dividerItemDecoration =
+            DividerItemDecoration(recyclerView.context, layoutManager.orientation)
+        recyclerView.addItemDecoration(dividerItemDecoration)
     }
 
-    fun parseCSVData(reader: Reader): List<CSVDataModel> {
-        val pharmacies = ArrayList<CSVDataModel>()
+    private fun parseCSVData(): List<CSVDataModel> {
+        val dataList = mutableListOf<CSVDataModel>() // Create a flat list
 
-        BufferedReader(reader).use { bufferedReader ->
-            var line: String?
-            while (bufferedReader.readLine().also { line = it } != null) {
-                //  println("CSV line read: $line")
-                val columns = line!!.split(";").map { it.trim() }
+        val resources: Resources = this.resources
+        val inputStream = resources.openRawResource(R.raw.eczane)
 
-                if (columns.size <= 6) {
+        val reader = BufferedReader(InputStreamReader(inputStream))
+        var line: String?
 
+        try {
+            // Skip the header line
+            reader.readLine()
+
+            while (reader.readLine().also { line = it } != null) {
+                val columns = line?.split(",")
+                if (columns != null && columns.size == 6) {
 
                     val eczaneAdi = columns[0].trim()
                     val iletisimNo = columns[1].trim()
@@ -49,20 +59,36 @@ class AllPharmacies : ComponentActivity() {
                     val boylam = columns[3].trim()
                     val adres = columns[4].trim()
 
-                    val pharmacy = CSVDataModel( eczaneAdi, iletisimNo, enlem, boylam, adres)
-
-                    pharmacies.add(pharmacy)
+                    val dataModel = CSVDataModel( eczaneAdi, iletisimNo, enlem, boylam, adres)
+                    dataList.add(dataModel) // Add data to the flat list
                 }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            try {
+                reader.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
 
-        return pharmacies
+        return dataList
     }
+    private fun groupPharmaciesByNeighborhood(dataList: List<CSVDataModel>): Map<String, List<CSVDataModel>> {
+        val groupedPharmacies = mutableMapOf<String, MutableList<CSVDataModel>>()
 
-    private fun createCSVReader(): Reader {
-        val inputStream: InputStream = resources.openRawResource(R.raw.eczane)
-        return InputStreamReader(inputStream, Charsets.UTF_8)
+        for (pharmacy in dataList) {
+            val neighborhood = pharmacy.adres.split(" ")[0]
+            println("Neighborhood: $neighborhood")
+            if (groupedPharmacies.containsKey(neighborhood)) {
+                groupedPharmacies[neighborhood]?.add(pharmacy)
+            } else {
+                groupedPharmacies[neighborhood] = mutableListOf(pharmacy)
+            }
+        }
+
+        return groupedPharmacies
     }
 
 }
-
