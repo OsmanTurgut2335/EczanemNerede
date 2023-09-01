@@ -27,7 +27,7 @@ class LocationBasedPharmacies : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_based_pharmacies)
-       val inputStream: InputStream = resources.openRawResource(R.raw.eczane)
+        val inputStream: InputStream = resources.openRawResource(R.raw.eczane)
         val swipeRefreshLayout: SwipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.isRefreshing = false
         latitude =intent.getDoubleExtra("latitude",0.0)
@@ -36,35 +36,35 @@ class LocationBasedPharmacies : AppCompatActivity() {
 
 
 
-      //  val inputStream: InputStream = resources.openRawResource(R.raw.eczane)
+        //  val inputStream: InputStream = resources.openRawResource(R.raw.eczane)
         val reader = BufferedReader(InputStreamReader(inputStream))
-         val pharmacies = parseCSVData(reader).sortedBy { it.distance }
+        val pharmacies = parseCSVData(reader).sortedBy { it.distance }
 
-       //val reader = createCSVReader()
+        //val reader = createCSVReader()
         //val pharmacies = parseCSVData(reader).sortedBy { it.distance }
 
 
+        println(pharmacies)
+        for (pharmacy in pharmacies) {
 
-            for (pharmacy in pharmacies) {
-
-                val distance =
-                    calculateDistance(latitude, longitude, pharmacy.enlem, pharmacy.boylam)
+            val distance =
+                calculateDistance(latitude, longitude, pharmacy.enlem, pharmacy.boylam)
 
 
-                if (distance <= 5.0) { // Check if the distance is within 5 kilometers
-                    if (distance == 0.0) {
-                        continue
-                    }
-                    nearbyPharmacies.add(pharmacy)
-                   
+            if (distance <= 5.0) { // Check if the distance is within 5 kilometers
+                if (distance == 0.0) {
+                    continue
                 }
+                nearbyPharmacies.add(pharmacy)
 
-                val recyclerView: RecyclerView = findViewById(R.id.locationBasedRecycler)
-                val adapter = AdapterforLocation(nearbyPharmacies, latitude, longitude)
-
-                recyclerView.adapter = adapter
-                recyclerView.layoutManager = LinearLayoutManager(this@LocationBasedPharmacies)
             }
+
+            val recyclerView: RecyclerView = findViewById(R.id.locationBasedRecycler)
+            val adapter = AdapterforLocation(nearbyPharmacies, latitude, longitude)
+
+            recyclerView.adapter = adapter
+            recyclerView.layoutManager = LinearLayoutManager(this@LocationBasedPharmacies)
+        }
 
 
 
@@ -98,7 +98,7 @@ class LocationBasedPharmacies : AppCompatActivity() {
         BufferedReader(reader).use { bufferedReader ->
             var line: String?
             while (bufferedReader.readLine().also { line = it } != null) {
-              //  println("CSV line read: $line")
+                //  println("CSV line read: $line")
                 val columns = line!!.split(";").map { it.trim() }
 
                 if (columns.size <= 6) {

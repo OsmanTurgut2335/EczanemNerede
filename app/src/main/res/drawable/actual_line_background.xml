@@ -1,0 +1,14 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Black Stroke -->
+
+    <!-- Gradient Background -->
+    <item android:left="1dp" android:right="1dp" android:top="1dp" android:bottom="1dp">
+        <shape>
+            <gradient
+                android:startColor="#f9f9f9"/> <!-- Light gray -->
+       <!-- Slightly darker red color -->
+            android:angle="45" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</layer-list>

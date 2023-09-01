@@ -220,7 +220,7 @@ class MainActivity : ComponentActivity() {
     fun allBtnClicked(v : View){
         val intent = Intent(this, AllPharmacies::class.java)
         startActivity(intent)
-        finish()
+
     }
     fun locationClicked(v: View){
 
