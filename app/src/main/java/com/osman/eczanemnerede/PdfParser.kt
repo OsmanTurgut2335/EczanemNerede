@@ -1,17 +1,18 @@
 package com.osman.eczanemnerede
-import android.icu.util.Calendar
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
 import java.io.ByteArrayInputStream
 import java.io.IOException
+
 data class WeekData(
-    val weekNumber: Int, // Add fields as needed
-    val districts: List<DistrictData>
+    val weekNumber: Int,
+    val districts: MutableList<DistrictData> // Change List to MutableList
 )
+
 
 data class DistrictData(
     val districtName: String,
-    val pharmacyDataList: List<PharmacyData>
+    val pharmacyDataList: MutableList<PharmacyData> // Use MutableList instead of List
 )
 
 data class PharmacyData(
@@ -19,17 +20,45 @@ data class PharmacyData(
     val pharmacyName: String,
     val address: String
 )
+
 class PdfParser {
     companion object {
+        fun getPharmacyNames(pdfContent: String): List<String> {
+            val weekDataList = parsePdf(pdfContent)
+            val pharmacyNames = mutableListOf<String>()
+
+            // Iterate through the parsed data to extract pharmacy names
+            for (weekData in weekDataList) {
+                for (districtData in weekData.districts) {
+                    for (pharmacyData in districtData.pharmacyDataList) {
+                        val pharmacyName = pharmacyData.pharmacyName
+                        pharmacyNames.add(pharmacyName)
+                    }
+                }
+            }
+
+            return pharmacyNames
+        }
         fun parsePdf(pdfContent: String): List<WeekData> {
             val weekDataList = mutableListOf<WeekData>()
 
-            // Iterate over pages
-            // ...
+            try {
+                val document = PDDocument.load(ByteArrayInputStream(pdfContent.toByteArray()))
+                val stripper = PDFTextStripper()
 
-            for (pageText in pages) {
-                val weekData = parsePage(pageText)
-                weekDataList.add(weekData)
+                for (pageNum in 0 until document.numberOfPages) {
+                    stripper.startPage = pageNum + 1
+                    stripper.endPage = pageNum + 1
+
+                    val pageText = stripper.getText(document)
+
+                    val weekData = parsePage(pageText)
+                    weekDataList.add(weekData)
+                }
+
+                document.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
 
             return weekDataList

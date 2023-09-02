@@ -1,13 +1,13 @@
 package com.osman.eczanemnerede
 
-import android.telecom.Call
+import okhttp3.ResponseBody
 import retrofit2.http.GET
 import retrofit2.http.Url
-
+import retrofit2.Call
+import retrofit2.http.Streaming
 
 interface PdfService {
-
     @GET
-    fun downloadPdfFile(@Url fileUrl: String): Call<String>
-
+    @Streaming
+    fun downloadPdfFile(@Url fileUrl: String): Call<ResponseBody>
 }

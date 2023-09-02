@@ -1,5 +1,6 @@
 package com.osman.eczanemnerede
 
+
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -221,6 +222,10 @@ class MainActivity : ComponentActivity() {
         val intent = Intent(this, AllPharmacies::class.java)
         startActivity(intent)
 
+    }
+    fun nöbetciEczaneClicked(v : View){
+        val intent = Intent(this, NobetciEczaneler::class.java)
+        startActivity(intent)
     }
     fun locationClicked(v: View){
 

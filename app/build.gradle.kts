@@ -6,7 +6,10 @@ plugins {
 android {
     namespace = "com.osman.eczanemnerede"
     compileSdk = 33
-
+    packagingOptions {
+        exclude ("META-INF/DEPENDENCIES") // Exclude this specific path
+        // You can add more exclusions or merges as needed
+    }
     defaultConfig {
         applicationId = "com.osman.eczanemnerede"
         minSdk = 24
@@ -55,6 +58,7 @@ dependencies {
     implementation ("com.opencsv:opencsv:5.5.2")
     implementation ("com.google.android.gms:play-services-location:21.0.1")
     implementation ("com.opencsv:opencsv:5.5.2")
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("org.apache.pdfbox:pdfbox:2.0.29")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
