@@ -1,0 +1,11 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Black Stroke -->
+    <item>
+        <shape>
+            <solid android:color="#03a5fc" /> <!-- Slightly darker red color -->
+            <corners android:radius="50dp" />
+        </shape>
+    </item>
+
+
+</layer-list>

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="60dp"
+
     android:layout_marginTop="10dp"
     android:textAlignment="center"
     android:background="@drawable/line_background"
@@ -16,6 +17,7 @@
 android:textStyle="italic"
         android:gravity="center"
         android:textColor="@color/white"
+
         android:text="TextView"
         android:textSize="20dp"
         app:layout_constraintBottom_toBottomOf="parent"

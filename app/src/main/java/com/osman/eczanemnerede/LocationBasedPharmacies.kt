@@ -28,8 +28,8 @@ class LocationBasedPharmacies : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_based_pharmacies)
         val inputStream: InputStream = resources.openRawResource(R.raw.eczane)
-        val swipeRefreshLayout: SwipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
-        swipeRefreshLayout.isRefreshing = false
+
+
         latitude =intent.getDoubleExtra("latitude",0.0)
         longitude = intent.getDoubleExtra("longitude",0.0)
 

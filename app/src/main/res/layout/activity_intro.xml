@@ -10,12 +10,11 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="380dp"
-        android:layout_height="188dp"
+        android:layout_width="373dp"
+        android:layout_height="127dp"
         android:layout_marginTop="92dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline6"
+
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.516"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
@@ -23,14 +22,15 @@
 
     <TextView
         android:id="@+id/textView4"
+        style="@style/BoldTextStyle"
         android:layout_width="269dp"
         android:layout_height="140dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="32dp"
         android:gravity="center"
-    style="@style/BoldTextStyle"
+        android:text="Tüm Veriler Konya Açık Veri Platformundan ve Konya Eczacı Odası Sitesinden Alınmıştır"
         android:textSize="24dp"
-        android:text="Tüm Veriler Konya Açık Veri Platformundan Alınmıştır"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.584"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline6" />
 
@@ -39,6 +39,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.43" />
+        app:layout_constraintGuide_percent="0.64" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="309dp"
+        android:layout_height="164dp"
+        android:layout_marginTop="64dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:srcCompat="@drawable/eczaciodasi" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

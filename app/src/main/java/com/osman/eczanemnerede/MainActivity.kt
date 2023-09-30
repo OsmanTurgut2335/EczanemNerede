@@ -223,10 +223,7 @@ class MainActivity : ComponentActivity() {
         startActivity(intent)
 
     }
-    fun nöbetciEczaneClicked(v : View){
-        val intent = Intent(this, NobetciEczaneler::class.java)
-        startActivity(intent)
-    }
+
     fun locationClicked(v: View){
 
         if(!(intent_Latitude.equals(0.0))) {
@@ -236,13 +233,17 @@ class MainActivity : ComponentActivity() {
 
             startActivity(intent2)
 
-            finish()
         }else{
             textView.isEnabled = false
             showEnableLocationDialog()
         }
 
 
+
+    }
+     fun nobetciClicked(v : View){
+        val intent = Intent(this, NobetciEczaneler::class.java)
+        startActivity(intent)
 
     }
 
@@ -358,4 +359,6 @@ class MainActivity : ComponentActivity() {
 
 
     }
+
+
 }
