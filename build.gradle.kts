@@ -4,7 +4,7 @@
 
 repositories {
     google()
-
+    mavenCentral()
     // other repositories if needed
 }
 plugins {

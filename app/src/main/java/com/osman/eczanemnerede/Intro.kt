@@ -11,7 +11,7 @@ import android.os.Looper
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-
+import com.google.android.gms.ads.MobileAds
 class Intro : AppCompatActivity() {
 
     lateinit var intent1: Intent // Declare intent1 as a property
@@ -22,6 +22,8 @@ class Intro : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_intro)
+        MobileAds.initialize(this) {}
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         if (ContextCompat.checkSelfPermission(
                 this,

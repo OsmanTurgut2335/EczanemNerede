@@ -35,7 +35,7 @@
             android:layout_height="100dp"
 
 
-            android:layout_marginTop="56dp"
+            android:layout_marginTop="40dp"
             android:background="@drawable/gradient_background_blue"
             android:gravity="center"
 
@@ -68,18 +68,18 @@
 
         <TextView
             android:id="@+id/textView3"
-            android:layout_width="294dp"
-            android:layout_height="133dp"
-          android:fontFamily="@font/volkornitalic"
-            android:textSize="16dp"
+            android:layout_width="295dp"
+            android:layout_height="124dp"
             android:layout_marginTop="44dp"
             android:background="@drawable/actual_blue"
+            android:fontFamily="@font/volkornitalic"
             android:gravity="center"
             android:text="Konumuma Yakın Eczaneler Butonu
 Aktif Hale Gelene Kadar Bekleyin"
+            android:textColor="@color/black"
 
 
-android:textColor="@color/black"
+            android:textSize="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent"
@@ -93,13 +93,28 @@ android:textColor="@color/black"
             android:background="@drawable/gradient_background_blue"
             android:gravity="center"
             android:onClick="nobetciClicked"
-            android:textStyle="bold"
             android:text="Nöbetçi Eczaneler \n
 (Konya Eczacı Odası Pdf Dosyası)"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/locationPharmaciesText" />
 
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="28dp"
+            app:adSize="BANNER"
+            app:adUnitId="ca-app-pub-9375990214690920/7179598977"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.494"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView5">
+
+        </com.google.android.gms.ads.AdView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

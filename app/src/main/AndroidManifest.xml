@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
     <application
 
         android:allowBackup="true"
@@ -17,6 +17,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EczanemNerede"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9375990214690920~6941238906"/>
+
         <activity
             android:name=".NobetciEczaneler"
             android:exported="false" />

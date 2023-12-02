@@ -4,12 +4,16 @@ package com.osman.eczanemnerede
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import android.net.Uri
+
 import android.os.Bundle
-import android.os.Handler
+
 import android.provider.Settings
 import android.view.View
 import android.widget.ProgressBar
@@ -21,28 +25,30 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 
+
 class MainActivity : ComponentActivity() {
 
     private val LOCATION_PERMISSION_REQUEST_CODE = 123
     private var permissionDeniedCount = 0
-    private var shouldAskForPermissionAgain = false
+
     var intent_Latitude : Double = 0.0
     private lateinit var textView: TextView
     var intent_Longitude :Double = 0.0
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var refreshLayout:SwipeRefreshLayout
     lateinit var intent2: Intent
+    var  versionCode : Int = 0
+    lateinit var mAdView : AdView
 
-    val handler = Handler()
-    companion object {
-        private const val REQUEST_LOCATION_PERMISSION = 1
-    }
+
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -58,6 +64,32 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
+         versionCode = getAppVersionCode(this)
+          if(versionCode< 12){
+         showUpdateNotification()
+          }
+
+
+
+        mAdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
+        mAdView.adListener = object: AdListener() {
+            override fun onAdClicked() {
+                // Code to be executed when the user clicks on an ad.
+            }
+
+            override fun onAdClosed() {
+                // Code to be executed when the user is about to return
+                // to the app after tapping on an ad.
+                mAdView.visibility = View.INVISIBLE
+            }
+
+
+        }
+
         textView = findViewById(R.id.locationPharmaciesText)
         textView.isEnabled=false
 
@@ -360,5 +392,44 @@ class MainActivity : ComponentActivity() {
 
     }
 
+
+
+    private fun showUpdateNotification() {
+        AlertDialog.Builder(this)
+            .setTitle("Güncelleme Gerekli")
+            .setMessage("Uygulamanın yeni bir versiyonu var. Lütfen daha iyi bir deneyim için uygulamanızı güncelleyin .")
+            .setPositiveButton("OK") { _, _ ->
+                // Open Play Store for manual update
+                openPlayStore()
+            }
+          //  .setNegativeButton("Later", null)
+            .show()
+    }
+
+    private fun openPlayStore() {
+        try {
+            startActivity(
+                packageManager.getLaunchIntentForPackage("com.android.vending")?.apply {
+                    data = android.net.Uri.parse("market://details?id=com.osman.eczanemnerede")
+                }
+            )
+        } catch (e: android.content.ActivityNotFoundException) {
+            // If Play Store app is not available, open the Play Store website
+            startActivity(
+                android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.osman.eczanemnerede")
+                )
+            )
+        }
+    }
+    private fun getAppVersionCode(context: Context): Int {
+        return try {
+            val pInfo: PackageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            pInfo.versionCode
+        } catch (e: PackageManager.NameNotFoundException) {
+            -1
+        }
+    }
 
 }
