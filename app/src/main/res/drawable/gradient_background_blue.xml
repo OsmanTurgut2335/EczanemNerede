@@ -2,7 +2,7 @@
     <!-- Black Stroke -->
     <item>
         <shape>
-            <solid android:color="#fcd703" /> <!-- Slightly darker red color -->
+            <solid android:color="#CDDC39" /> <!-- Slightly darker red color -->
             <corners android:radius="50dp" />
         </shape>
     </item>
@@ -11,7 +11,7 @@
     <item android:left="1dp" android:right="1dp" android:top="1dp" android:bottom="1dp">
         <shape>
             <gradient
-                android:startColor="#fcd703" /><!-- Slightly darker red color -->
+                android:startColor="#CDDC39" /><!-- Slightly darker red color -->
             android:endColor="#d73a3a" <!-- Slightly darker red color -->
             android:angle="45" />
             <corners android:radius="50dp" />

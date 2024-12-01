@@ -72,11 +72,12 @@
             android:layout_height="124dp"
             android:layout_marginTop="44dp"
             android:background="@drawable/actual_blue"
-            android:fontFamily="@font/volkornitalic"
+
+
             android:gravity="center"
             android:text="Konumuma Yakın Eczaneler Butonu
 Aktif Hale Gelene Kadar Bekleyin"
-            android:textColor="@color/black"
+            android:textColor="#424242"
 
 
             android:textSize="16dp"

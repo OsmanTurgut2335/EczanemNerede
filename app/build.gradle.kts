@@ -16,8 +16,8 @@ android {
     defaultConfig {
         applicationId = "com.osman.eczanemnerede"
         minSdk = 24
-        targetSdk = 33
-        versionCode = 12
+        targetSdk = 34
+        versionCode = 28
         versionName = "2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -61,7 +61,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation ("com.opencsv:opencsv:5.5.2")
     implementation ("com.google.android.gms:play-services-location:21.0.1")
-    implementation ("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
+    implementation ("com.github.mhiew:android-pdf-viewer:3.2.0-beta.3")
     implementation ("com.rmtheis:tess-two:9.1.0")
     implementation ("com.google.android.gms:play-services-ads:22.5.0")
 

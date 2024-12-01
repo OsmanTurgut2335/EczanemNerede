@@ -8,12 +8,8 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdView
 import android.net.Uri
-
 import android.os.Bundle
-
 import android.provider.Settings
 import android.view.View
 import android.widget.ProgressBar
@@ -26,7 +22,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest

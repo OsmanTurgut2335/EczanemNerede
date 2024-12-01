@@ -2,10 +2,19 @@
     <!-- Black Stroke -->
     <item>
         <shape>
-            <solid android:color="#03a5fc" /> <!-- Slightly darker red color -->
+            <solid android:color="#66BB6A" /> <!-- Slightly darker red color -->
             <corners android:radius="50dp" />
         </shape>
     </item>
 
-
+    <!-- Gradient Background -->
+    <item android:left="1dp" android:right="1dp" android:top="1dp" android:bottom="1dp">
+        <shape>
+            <gradient
+                android:startColor="#66BB6A"  /><!-- Slightly darker red color -->
+            android:endColor="#d73a3a" <!-- Slightly darker red color -->
+            android:angle="45" />
+            <corners android:radius="50dp" />
+        </shape>
+    </item>
 </layer-list>

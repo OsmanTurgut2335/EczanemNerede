@@ -1,8 +1,8 @@
-<shape xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android" tools:ignore="ExtraText">
-    <gradient android:startColor="#A9A9A9"/>
-    <!--  Dark grey  -->
-    android:endColor="#404040"
-    <!--  Even darker grey  -->
-    android:angle="45" />
-    <!--  Gradient angle (45 degrees)  -->
+<shape xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:ignore="ExtraText">
+    <gradient android:startColor="#9E9E9E"
+        android:endColor="#BDBDBD"
+        />
+
 </shape>
