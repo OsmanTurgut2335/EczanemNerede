@@ -29,6 +29,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import org.jsoup.Jsoup
 
 
 class MainActivity : ComponentActivity() {
@@ -44,7 +45,6 @@ class MainActivity : ComponentActivity() {
     lateinit var intent2: Intent
     var  versionCode : Int = 0
     lateinit var mAdView : AdView
-
 
 
     private val requestPermissionLauncher =
@@ -63,10 +63,10 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.activity_main)
 
 
-         versionCode = getAppVersionCode(this)
-          if(versionCode< 12){
-         showUpdateNotification()
-          }
+        versionCode = getAppVersionCode(this)
+        if(versionCode< 12){
+            showUpdateNotification()
+        }
 
 
 
@@ -169,9 +169,40 @@ class MainActivity : ComponentActivity() {
         }
 
 
+            // Get the current installed version
+            val currentVersion = getAppVersionCode(this)
+
+            // Fetch the latest version from Play Store
+            checkLatestVersion { latestVersion ->
+                if (latestVersion > currentVersion) {
+                    showUpdateNotification()
+                }
+            }
+
     }
 
 
+    private fun checkLatestVersion(callback: (Int) -> Unit) {
+        val appPackageName = packageName
+        val url = "https://play.google.com/store/apps/details?id=$appPackageName&hl=en"
+
+        Thread {
+            try {
+                val document = Jsoup.connect(url).get()
+                val versionElement = document.select("div[itemprop=softwareVersion]").first()
+
+                val latestVersion = versionElement?.text()?.trim()?.split(" ")?.last()?.toIntOrNull()
+
+                if (latestVersion != null) {
+                    runOnUiThread {
+                        callback(latestVersion)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }.start()
+    }
 
     private fun checkLocationPermission() {
         if (hasLocationPermissions()) {
@@ -215,7 +246,6 @@ class MainActivity : ComponentActivity() {
                 }
         }
     }
-
 
 
 
@@ -270,11 +300,18 @@ class MainActivity : ComponentActivity() {
 
 
     }
-     fun nobetciClicked(v : View){
+   private fun intentToNobetci(){
         val intent = Intent(this, NobetciEczaneler::class.java)
         startActivity(intent)
+    }
+    private fun nobetciClicked(v: View){
+        intentToNobetci()
+
 
     }
+
+
+
 
     private fun showEnableLocationDialog() {
         val dialogBuilder = AlertDialog.Builder(this@MainActivity)
@@ -293,44 +330,7 @@ class MainActivity : ComponentActivity() {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
-    private fun getLocation() {
-        // Check if permission is granted again (it might be revoked while app is running)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
-            // Use fusedLocationClient to request the user's location
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location ->
-                    if (location != null) {
-                        val latitude = location.latitude
-                        val longitude = location.longitude
-                        intent_Latitude = latitude
-                        intent_Longitude= longitude
 
-                        // Do something with latitude and longitude
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    // Handle error in getting location
-                }
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLocation()
-            } else {
-                // Handle permission denied case
-            }
-        }
-    }
 
     fun getLocationOsman(){
         if (isLocationEnabled(this)) {
@@ -390,36 +390,31 @@ class MainActivity : ComponentActivity() {
     }
 
 
-
     private fun showUpdateNotification() {
         AlertDialog.Builder(this)
             .setTitle("Güncelleme Gerekli")
-            .setMessage("Uygulamanın yeni bir versiyonu var. Lütfen daha iyi bir deneyim için uygulamanızı güncelleyin .")
-            .setPositiveButton("OK") { _, _ ->
-                // Open Play Store for manual update
+            .setMessage("Uygulamanın yeni bir versiyonu var. Lütfen güncelleyin.")
+            .setPositiveButton("Güncelle") { _, _ ->
                 openPlayStore()
             }
-          //  .setNegativeButton("Later", null)
+            .setNegativeButton("Daha Sonra", null)
+            .setCancelable(false)
             .show()
     }
 
     private fun openPlayStore() {
+        val appPackageName = packageName
         try {
             startActivity(
-                packageManager.getLaunchIntentForPackage("com.android.vending")?.apply {
-                    data = android.net.Uri.parse("market://details?id=com.osman.eczanemnerede")
-                }
+                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName"))
             )
-        } catch (e: android.content.ActivityNotFoundException) {
-            // If Play Store app is not available, open the Play Store website
+        } catch (e: Exception) {
             startActivity(
-                android.content.Intent(
-                    android.content.Intent.ACTION_VIEW,
-                    android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.osman.eczanemnerede")
-                )
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName"))
             )
         }
     }
+
     private fun getAppVersionCode(context: Context): Int {
         return try {
             val pInfo: PackageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
