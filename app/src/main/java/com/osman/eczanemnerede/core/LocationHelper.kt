@@ -61,5 +61,11 @@ object LocationHelper {
         return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
     }
+    fun hasLocationPermissions(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
 }

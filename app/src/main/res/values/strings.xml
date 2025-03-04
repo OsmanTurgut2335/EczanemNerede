@@ -3,8 +3,9 @@
 
         <!-- Permission Dialog -->
         <string name="permission_denied">İzin Reddedildi</string>
-        <string name="permission_message">Konum izni bu özelliği kullanmak için gereklidir. Lütfen ayarlardan izin verin.</string>
-        <string name="open_settings">Ayarları Aç</string>
+    <string name="permission_denied_message">Konum izni kapalı. Lütfen tekrar deneyin.</string>
+
+    <string name="open_settings">Ayarları Aç</string>
         <string name="retry">Tekrar Dene</string>
 
         <!-- Toast Messages -->
@@ -21,5 +22,9 @@
         <string name="update_now">Güncelle</string>
         <string name="update_later">Daha Sonra</string>
 
+    <string name="permission_required">Konum İzni Gerekli</string>
+    <string name="permission_settings_message">Konum izni olmadan tüm özellikleri kullanamazsınız. Lütfen ayarlardan izin verin.</string>
+
+    <string name="cancel">İptal</string>
 
 </resources>

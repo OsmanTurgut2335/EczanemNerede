@@ -10,6 +10,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -42,7 +43,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var refreshLayout:SwipeRefreshLayout
     lateinit var intent2: Intent
-
+    // Declare this as a global variable
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     lateinit var mAdView : AdView
 
     lateinit var progressBar: ProgressBar
@@ -52,6 +54,38 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.activity_main)
 
          progressBar  = findViewById(R.id.loadingProgressBar)
+
+        requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Show ProgressBar when permission is granted
+                progressBar.visibility = View.VISIBLE
+
+                LocationHelper.getCurrentLocation(
+                    context = this,
+                    onLocationReceived = { latitude, longitude ->
+                        // Location successfully received
+                        intent_Latitude = latitude
+                        intent_Longitude = longitude
+                        textView.isEnabled = true
+
+                        // Hide ProgressBar
+                        progressBar.visibility = View.GONE
+                    },
+                    onPermissionRequest = {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            1001
+                        )
+                    }
+                )
+            } else {
+                // Permission denied, increase count
+                permissionDeniedCount++
+            }
+        }
 
 
         mAdView = findViewById(R.id.adView)
@@ -100,64 +134,77 @@ class MainActivity : ComponentActivity() {
 
 
     }
-    private fun setRefreshLayout(){
+    private fun setRefreshLayout() {
         refreshLayout.setOnRefreshListener {
-            if (LocationHelper.isLocationEnabled(this)) {
-                // Location services are enabled
+            // Always show the permission denied toast if there's no permission
+            if (!LocationHelper.hasLocationPermissions(this)) {
+                Toast.makeText(this, getString(R.string.permission_denied_message), Toast.LENGTH_LONG).show()
 
-                val progressBar = findViewById<ProgressBar>(R.id.loadingProgressBar)
-                progressBar.visibility = View.VISIBLE // Show the ProgressBar
-
-                val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-                val locationRequest = LocationRequest.create().apply {
-                    interval = 10000 // Interval for updates in milliseconds
-                    fastestInterval = 5000 // Fastest interval for updates in milliseconds
-                    priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                // If permission is denied 2+ times, show a popup instead of asking again
+                if (permissionDeniedCount >= 2) {
+                    showPermissionSettingsDialog()
+                } else {
+                    requestLocationPermissions()
                 }
+                refreshLayout.isRefreshing = false
+                return@setOnRefreshListener
+            }
 
-                val locationCallback = object : LocationCallback() {
-                    override fun onLocationResult(locationResult: LocationResult) {
-                        super.onLocationResult(locationResult)
+            if (!LocationHelper.isLocationEnabled(this)) {
+                // Location services are disabled, show toast message
+                Toast.makeText(this, getString(R.string.enable_location_services), Toast.LENGTH_LONG).show()
+                refreshLayout.isRefreshing = false
+                return@setOnRefreshListener
+            }
 
-                        if (locationResult.locations.isNotEmpty()) {
-                            val location = locationResult.locations[0] // Get the latest location
+            // Show ProgressBar when refresh starts
+            progressBar.visibility = View.VISIBLE
 
-                            val latitude = location.latitude
-                            val longitude = location.longitude
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            val locationRequest = LocationRequest.create().apply {
+                interval = 10000
+                fastestInterval = 5000
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            }
 
-                            // Update the intent_Latitude and intent_Longitude values
-                            intent_Latitude = latitude
-                            intent_Longitude = longitude
-                            progressBar.visibility = View.INVISIBLE // Show the ProgressBar
-                            // Enable the textView here (if needed)
-                            textView.isEnabled = true
+            val locationCallback = object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    super.onLocationResult(locationResult)
 
-                            // Handle other location updates or UI operations if necessary
-                        }
+                    if (locationResult.locations.isNotEmpty()) {
+                        val location = locationResult.locations[0] // Get the latest location
+
+                        val latitude = location.latitude
+                        val longitude = location.longitude
+
+                        // Update the intent_Latitude and intent_Longitude values
+                        intent_Latitude = latitude
+                        intent_Longitude = longitude
+
+                        // Hide ProgressBar once location is received
+                        progressBar.visibility = View.GONE
+                        textView.isEnabled = true
                     }
                 }
+            }
 
-
-                if (ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
+            if (LocationHelper.hasLocationPermissions(this)) {
+                try {
                     fusedLocationClient.requestLocationUpdates(
                         locationRequest,
                         locationCallback,
                         null
                     )
-                } else {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                        LOCATION_PERMISSION_REQUEST_CODE
-                    )
+                } catch (e: SecurityException) {
+                    e.printStackTrace() // Log the error
+                    progressBar.visibility = View.GONE // Hide ProgressBar on error
                 }
             } else {
-                Toast.makeText(this, getString(R.string.enable_location_services), Toast.LENGTH_LONG).show()
-
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
             }
 
             refreshLayout.isRefreshing = false
@@ -166,8 +213,12 @@ class MainActivity : ComponentActivity() {
 
 
 
+
+
+
+
     private fun checkLocationPermission() {
-        if (hasLocationPermissions()) {
+        if (LocationHelper.hasLocationPermissions(this)) {
             LocationHelper.getCurrentLocation(
                 context = this,
                 onLocationReceived = { latitude, longitude ->
@@ -191,73 +242,39 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun hasLocationPermissions(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
 
     private fun requestLocationPermissions() {
-         val requestPermissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-                if (isGranted) {
-                    LocationHelper.getCurrentLocation(
-                        context = this,
-                        onLocationReceived = { latitude, longitude ->
-                            intent_Latitude = latitude
-                            intent_Longitude = longitude
-                            textView.isEnabled = true
-                            progressBar.visibility = View.GONE
-                        },
-                        onPermissionRequest = {
-                            ActivityCompat.requestPermissions(
-                                this,
-                                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                                1001
-                            )
-                        }
-                    )
-
-                } else {
-                    // Handle the case where the user denied permission
-                    permissionDeniedCount++
-                    showPermissionDeniedDialog()
-                }
-            }
-
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-
-    private fun showPermissionDeniedDialog() {
+    private fun showPermissionSettingsDialog() {
         val dialogBuilder = AlertDialog.Builder(this@MainActivity)
-        dialogBuilder.setTitle(getString(R.string.permission_denied))
-            .setMessage(getString(R.string.permission_message))
-            .apply {
-                if (permissionDeniedCount >= 2) {
-                    setNegativeButton(getString(R.string.open_settings)) { dialog, _ ->
-                        dialog.dismiss()
-                        openAppSettings()
-                    }
-                } else {
-                    setPositiveButton(getString(R.string.retry)) { _, _ ->
-                        requestLocationPermissions()
-                    }
-                }
+        dialogBuilder.setTitle(getString(R.string.permission_required))
+            .setMessage(getString(R.string.permission_settings_message))
+            .setPositiveButton(getString(R.string.open_settings)) { _, _ ->
+                openAppSettings()
             }
+            .setNegativeButton(getString(R.string.cancel), null)
             .setCancelable(false)
             .show()
     }
+
+
+
+    private fun showPermissionDeniedDialog() {
+        Toast.makeText(this, getString(R.string.permission_denied_message), Toast.LENGTH_LONG).show()
+    }
+
 
     private fun openAppSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uri = Uri.fromParts("package", packageName, null)
         intent.data = uri
-
         startActivity(intent)
-
     }
+
+
+
     fun allBtnClicked(v : View){
         val intent = Intent(this, AllPharmacies::class.java)
         startActivity(intent)
