@@ -1,9 +1,10 @@
-package com.osman.eczanemnerede
+package com.osman.eczanemnerede.screens
 
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.github.barteksc.pdfviewer.PDFView
+import com.osman.eczanemnerede.R
 import okhttp3.*
 import java.io.File
 import java.io.IOException

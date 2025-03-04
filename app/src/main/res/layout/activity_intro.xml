@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
 
     android:background="@drawable/intro_background"
-    tools:context=".Intro">
+    tools:context=".screens.Intro">
 
     <ImageView
         android:id="@+id/imageView"

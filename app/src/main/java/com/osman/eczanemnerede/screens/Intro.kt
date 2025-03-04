@@ -1,4 +1,4 @@
-package com.osman.eczanemnerede
+package com.osman.eczanemnerede.screens
 
 import android.Manifest
 import android.content.Intent
@@ -12,6 +12,9 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.ads.MobileAds
+import com.osman.eczanemnerede.MainActivity
+import com.osman.eczanemnerede.R
+
 class Intro : AppCompatActivity() {
 
     lateinit var intent1: Intent // Declare intent1 as a property

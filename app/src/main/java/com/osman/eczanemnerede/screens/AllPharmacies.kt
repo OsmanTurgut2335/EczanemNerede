@@ -1,10 +1,13 @@
-package com.osman.eczanemnerede
+package com.osman.eczanemnerede.screens
 import android.content.res.Resources
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.osman.eczanemnerede.GroupedCSVAdapter
+import com.osman.eczanemnerede.R
+import com.osman.eczanemnerede.data.CSVDataModel
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader

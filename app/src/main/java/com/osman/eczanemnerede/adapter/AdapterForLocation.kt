@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.osman.eczanemnerede.core.DistanceUtility
+import com.osman.eczanemnerede.data.CSVDataForLocation
 
 class AdapterforLocation(private val dataList: List<CSVDataForLocation>,
 
@@ -31,7 +33,7 @@ class AdapterforLocation(private val dataList: List<CSVDataForLocation>,
             val intent = Intent(Intent.ACTION_VIEW, uri)
             it.context.startActivity(intent)
         }
-        val distance = Utility.pharmacyUtility.calculateDistance(
+        val distance = DistanceUtility.calculateDistance(
             userLatitude,
             userLongitude,
             data.enlem,

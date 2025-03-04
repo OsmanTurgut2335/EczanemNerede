@@ -1,13 +1,7 @@
 package com.osman.eczanemnerede
-
-
 import android.Manifest
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -21,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.app.core.utils.LocationHelper
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
@@ -29,6 +24,10 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.osman.eczanemnerede.core.VersionController
+import com.osman.eczanemnerede.screens.AllPharmacies
+import com.osman.eczanemnerede.screens.LocationBasedPharmacies
+import com.osman.eczanemnerede.screens.NobetciEczaneler
 import org.jsoup.Jsoup
 
 
@@ -43,31 +42,16 @@ class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var refreshLayout:SwipeRefreshLayout
     lateinit var intent2: Intent
-    var  versionCode : Int = 0
+
     lateinit var mAdView : AdView
 
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                getLocationOsman()
-            } else {
-                // Handle the case where the user denied permission
-                permissionDeniedCount++
-                showPermissionDeniedDialog()
-            }
-        }
+    lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-        versionCode = getAppVersionCode(this)
-        if(versionCode< 12){
-            showUpdateNotification()
-        }
-
+         progressBar  = findViewById(R.id.loadingProgressBar)
 
 
         mAdView = findViewById(R.id.adView)
@@ -90,7 +74,7 @@ class MainActivity : ComponentActivity() {
         textView = findViewById(R.id.locationPharmaciesText)
         textView.isEnabled=false
 
-        if (!isLocationEnabled(this)) {
+        if (!LocationHelper.isLocationEnabled(this)) {
             textView.isEnabled = true
             checkLocationPermission()
         } else {
@@ -103,8 +87,22 @@ class MainActivity : ComponentActivity() {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        setRefreshLayout()
+
+
+
+        VersionController.checkLatestVersion(this) { latestVersion ->
+            val currentVersion = VersionController.getAppVersionCode(this)
+            if (latestVersion > currentVersion) {
+                VersionController.showUpdateNotification(this, packageName)
+            }
+        }
+
+
+    }
+    private fun setRefreshLayout(){
         refreshLayout.setOnRefreshListener {
-            if (isLocationEnabled(this)) {
+            if (LocationHelper.isLocationEnabled(this)) {
                 // Location services are enabled
 
                 val progressBar = findViewById<ProgressBar>(R.id.loadingProgressBar)
@@ -158,55 +156,35 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             } else {
-                Toast.makeText(
-                    this,
-                    "Lütfen konum servisinizi aktif hale getirin",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this, getString(R.string.enable_location_services), Toast.LENGTH_LONG).show()
+
             }
 
             refreshLayout.isRefreshing = false
         }
-
-
-            // Get the current installed version
-            val currentVersion = getAppVersionCode(this)
-
-            // Fetch the latest version from Play Store
-            checkLatestVersion { latestVersion ->
-                if (latestVersion > currentVersion) {
-                    showUpdateNotification()
-                }
-            }
-
     }
 
 
-    private fun checkLatestVersion(callback: (Int) -> Unit) {
-        val appPackageName = packageName
-        val url = "https://play.google.com/store/apps/details?id=$appPackageName&hl=en"
-
-        Thread {
-            try {
-                val document = Jsoup.connect(url).get()
-                val versionElement = document.select("div[itemprop=softwareVersion]").first()
-
-                val latestVersion = versionElement?.text()?.trim()?.split(" ")?.last()?.toIntOrNull()
-
-                if (latestVersion != null) {
-                    runOnUiThread {
-                        callback(latestVersion)
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }.start()
-    }
 
     private fun checkLocationPermission() {
         if (hasLocationPermissions()) {
-            getLocationOsman()
+            LocationHelper.getCurrentLocation(
+                context = this,
+                onLocationReceived = { latitude, longitude ->
+                    intent_Latitude = latitude
+                    intent_Longitude = longitude
+                    textView.isEnabled = true
+                    progressBar.visibility = View.GONE
+                },
+                onPermissionRequest = {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        1001
+                    )
+                }
+            )
+
 
         } else {
             requestLocationPermissions()
@@ -221,47 +199,49 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun requestLocationPermissions() {
+         val requestPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+                if (isGranted) {
+                    LocationHelper.getCurrentLocation(
+                        context = this,
+                        onLocationReceived = { latitude, longitude ->
+                            intent_Latitude = latitude
+                            intent_Longitude = longitude
+                            textView.isEnabled = true
+                            progressBar.visibility = View.GONE
+                        },
+                        onPermissionRequest = {
+                            ActivityCompat.requestPermissions(
+                                this,
+                                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                                1001
+                            )
+                        }
+                    )
+
+                } else {
+                    // Handle the case where the user denied permission
+                    permissionDeniedCount++
+                    showPermissionDeniedDialog()
+                }
+            }
+
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
-    private fun getUserLocation() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    location?.let {
-                        val latitude = location.latitude
-                        val longitude = location.longitude
-                        intent_Latitude = latitude
-                        intent_Longitude= longitude
-                        textView.isEnabled=true
-
-
-                    } ?: run {
-
-                    }
-                }
-        }
-    }
-
-
 
 
     private fun showPermissionDeniedDialog() {
         val dialogBuilder = AlertDialog.Builder(this@MainActivity)
-        dialogBuilder.setTitle("Permission Denied")
-            .setMessage("Location permission is required to use this feature. Please grant the permission in the settings.")
+        dialogBuilder.setTitle(getString(R.string.permission_denied))
+            .setMessage(getString(R.string.permission_message))
             .apply {
                 if (permissionDeniedCount >= 2) {
-                    setNegativeButton("Open Settings") { dialog, _ ->
+                    setNegativeButton(getString(R.string.open_settings)) { dialog, _ ->
                         dialog.dismiss()
                         openAppSettings()
                     }
                 } else {
-                    setPositiveButton("Retry") { _, _ ->
+                    setPositiveButton(getString(R.string.retry)) { _, _ ->
                         requestLocationPermissions()
                     }
                 }
@@ -269,6 +249,7 @@ class MainActivity : ComponentActivity() {
             .setCancelable(false)
             .show()
     }
+
     private fun openAppSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uri = Uri.fromParts("package", packageName, null)
@@ -296,132 +277,25 @@ class MainActivity : ComponentActivity() {
             textView.isEnabled = false
             showEnableLocationDialog()
         }
-
-
-
     }
-   private fun intentToNobetci(){
+
+
+    private fun intentToNobetci(){
         val intent = Intent(this, NobetciEczaneler::class.java)
         startActivity(intent)
     }
-    private fun nobetciClicked(v: View){
+     fun nobetciClicked(v: View){
         intentToNobetci()
-
-
     }
-
-
-
 
     private fun showEnableLocationDialog() {
         val dialogBuilder = AlertDialog.Builder(this@MainActivity)
-        dialogBuilder.setTitle("Konum Bulunamadı")
-            .setMessage("Lütfen konumunuzu aktif hale getirin ve sayfayı yenileyerek " +
-                    "butonun basılabilir olmasını bekleyin ")
-            .setPositiveButton("Tamam") { _, _ ->
-
-            }
-
-            .setCancelable(false)
-            .show()
-    }
-    fun isLocationEnabled(context: Context): Boolean {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-    }
-
-
-    fun getLocationOsman(){
-        if (isLocationEnabled(this)) {
-            // Location services are enabled
-
-            val progressBar = findViewById<ProgressBar>(R.id.loadingProgressBar)
-            progressBar.visibility = View.VISIBLE // Show the ProgressBar
-
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-            val locationRequest = LocationRequest.create().apply {
-                interval = 10000 // Interval for updates in milliseconds
-                fastestInterval = 5000 // Fastest interval for updates in milliseconds
-                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            }
-
-            val locationCallback = object : LocationCallback() {
-                override fun onLocationResult(locationResult: LocationResult) {
-                    super.onLocationResult(locationResult)
-                    for (location in locationResult.locations) {
-                        val latitude = location.latitude
-                        val longitude = location.longitude
-                        intent_Latitude=latitude
-                        intent_Longitude=longitude
-                        textView.isEnabled=true
-                        progressBar.visibility = View.GONE
-                        // Handle location updates here
-                    }
-                }
-            }
-
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                fusedLocationClient.requestLocationUpdates(
-                    locationRequest,
-                    locationCallback,
-                    null
-                )
-            } else {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
-            }
-        } else {
-            Toast.makeText(
-                this,
-                "Lütfen konum servisinizi aktif hale getirin",
-                Toast.LENGTH_LONG
-            ).show()
-        }
-
-
-    }
-
-
-    private fun showUpdateNotification() {
-        AlertDialog.Builder(this)
-            .setTitle("Güncelleme Gerekli")
-            .setMessage("Uygulamanın yeni bir versiyonu var. Lütfen güncelleyin.")
-            .setPositiveButton("Güncelle") { _, _ ->
-                openPlayStore()
-            }
-            .setNegativeButton("Daha Sonra", null)
+        dialogBuilder.setTitle(getString(R.string.location_not_found))
+            .setMessage(getString(R.string.location_not_found_message))
+            .setPositiveButton(getString(R.string.ok)) { _, _ -> }
             .setCancelable(false)
             .show()
     }
 
-    private fun openPlayStore() {
-        val appPackageName = packageName
-        try {
-            startActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName"))
-            )
-        } catch (e: Exception) {
-            startActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName"))
-            )
-        }
-    }
-
-    private fun getAppVersionCode(context: Context): Int {
-        return try {
-            val pInfo: PackageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            pInfo.versionCode
-        } catch (e: PackageManager.NameNotFoundException) {
-            -1
-        }
-    }
 
 }

@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.osman.eczanemnerede.CSVDataModel
+import com.osman.eczanemnerede.data.CSVDataModel
 
 class GroupedCSVAdapter(private val groupedData: Map<String, List<CSVDataModel>>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {

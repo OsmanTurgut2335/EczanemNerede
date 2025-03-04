@@ -1,13 +1,14 @@
-package com.osman.eczanemnerede
+package com.osman.eczanemnerede.screens
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.osman.eczanemnerede.AdapterforLocation
+import com.osman.eczanemnerede.R
+import com.osman.eczanemnerede.data.CSVDataForLocation
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader

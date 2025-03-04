@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">EczanemNerede</string>
+
+        <!-- Permission Dialog -->
+        <string name="permission_denied">İzin Reddedildi</string>
+        <string name="permission_message">Konum izni bu özelliği kullanmak için gereklidir. Lütfen ayarlardan izin verin.</string>
+        <string name="open_settings">Ayarları Aç</string>
+        <string name="retry">Tekrar Dene</string>
+
+        <!-- Toast Messages -->
+        <string name="enable_location_services">Lütfen konum servisinizi aktif hale getirin</string>
+
+        <!-- Location Not Found Dialog -->
+        <string name="location_not_found">Konum Bulunamadı</string>
+        <string name="location_not_found_message">Lütfen konumunuzu aktif hale getirin ve sayfayı yenileyerek butonun basılabilir olmasını bekleyin.</string>
+        <string name="ok">Tamam</string>
+
+        <!-- Update Dialog -->
+        <string name="update_required">Güncelleme Gerekli</string>
+        <string name="update_message">Uygulamanın yeni bir versiyonu var. Lütfen güncelleyin.</string>
+        <string name="update_now">Güncelle</string>
+        <string name="update_later">Daha Sonra</string>
+
+
 </resources>

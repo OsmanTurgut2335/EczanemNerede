@@ -1,4 +1,4 @@
-package com.osman.eczanemnerede
+package com.osman.eczanemnerede.data
 
 data class CSVDataForLocation(
 
