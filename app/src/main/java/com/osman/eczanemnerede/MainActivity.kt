@@ -59,18 +59,16 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                // Show ProgressBar when permission is granted
-                progressBar.visibility = View.VISIBLE
+                if (LocationHelper.isLocationEnabled(this)) {
+                    progressBar.visibility = View.VISIBLE
+                }
 
                 LocationHelper.getCurrentLocation(
                     context = this,
                     onLocationReceived = { latitude, longitude ->
-                        // Location successfully received
                         intent_Latitude = latitude
                         intent_Longitude = longitude
                         textView.isEnabled = true
-
-                        // Hide ProgressBar
                         progressBar.visibility = View.GONE
                     },
                     onPermissionRequest = {
@@ -81,7 +79,8 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 )
-            } else {
+            }
+            else {
                 // Permission denied, increase count
                 permissionDeniedCount++
             }
@@ -135,6 +134,7 @@ class MainActivity : ComponentActivity() {
 
     }
     private fun setRefreshLayout() {
+        //TODO if location permission is given stop the refresh
         refreshLayout.setOnRefreshListener {
             // Always show the permission denied toast if there's no permission
             if (!LocationHelper.hasLocationPermissions(this)) {

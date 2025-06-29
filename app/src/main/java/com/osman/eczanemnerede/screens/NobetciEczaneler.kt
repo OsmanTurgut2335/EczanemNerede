@@ -8,48 +8,104 @@ import androidx.appcompat.app.AppCompatActivity
 import com.github.barteksc.pdfviewer.PDFView
 import com.osman.eczanemnerede.R
 import okhttp3.*
+import org.jsoup.Jsoup
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class NobetciEczaneler : AppCompatActivity() {
+
     private lateinit var pdfView: PDFView
-    private lateinit var progressBar: ProgressBar  // Declare ProgressBar
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nobetci_eczaneler)
 
         pdfView = findViewById(R.id.pdfView)
-        progressBar = findViewById(R.id.progressBar) // Initialize ProgressBar
+        progressBar = findViewById(R.id.progressBar)
 
-        // Get the correct month's PDF URL
-        val pdfUrl = getCurrentMonthPDFUrl()
+        // 1. ProgressBar göster
+        progressBar.visibility = View.VISIBLE
 
-        // Download and display the PDF
-        downloadAndDisplayPDF(pdfUrl)
+        // 2. Güncel PDF bağlantısını al
+        fetchLatestPdfUrl { pdfUrl ->
+            runOnUiThread {
+                if (pdfUrl != null) {
+                    downloadAndDisplayPDF(pdfUrl)
+                } else {
+                    progressBar.visibility = View.GONE
+                    Toast.makeText(this, "PDF bağlantısı bulunamadı!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
-    // Function to get the correct month in Turkish and generate the PDF URL
-    private fun getCurrentMonthPDFUrl(): String {
-        val turkishLocale = Locale("tr", "TR")
-        val dateFormat = SimpleDateFormat("MMMM", turkishLocale) // Full month name in Turkish
-        val monthName = dateFormat.format(Date()).uppercase() // Convert to uppercase
-        return "https://keo.org.tr/dosyalar/files/$monthName.pdf"
+    // JSoup ile en güncel PDF linkini bulan fonksiyon
+    private fun fetchLatestPdfUrl(callback: (String?) -> Unit) {
+        Thread {
+            try {
+                val doc = Jsoup.connect("https://keo.org.tr/kategori/nobetle-ilgili-462077/")
+                    .userAgent("Mozilla/5.0")
+                    .get()
+                val turkishLocale = Locale("tr", "TR")
+                val currentMonth = SimpleDateFormat("MMMM", turkishLocale).format(Date()).lowercase(turkishLocale)
+
+                val selector = "a[href*=-$currentMonth][href*=-nobetci-eczane]"
+
+                val latestAnnouncementElement = doc.select(selector).first()
+
+                println("YARRRRRRRRRRRAK")
+                println(latestAnnouncementElement)
+
+                val detailUrl = latestAnnouncementElement?.attr("href")
+
+
+                if (detailUrl == null) {
+                    callback(null)
+                    return@Thread
+                }
+
+                val rawHref = latestAnnouncementElement?.attr("href")
+
+                val fullDetailUrl = when {
+                    rawHref == null -> null
+                    rawHref.startsWith("http") -> rawHref
+                    rawHref.startsWith("/") -> "https://keo.org.tr$rawHref"
+                    else -> "https://keo.org.tr/$rawHref"  // ← işte burası eksik '/' varsa tamamlıyor
+                }
+
+
+                println("YARRRRRRRRRRRAK")
+                println(fullDetailUrl)
+
+                // Duyuru detay sayfasını aç
+                val detailDoc = Jsoup.connect(fullDetailUrl).get()
+
+                // PDF linkini al
+                val pdfElement = detailDoc.selectFirst("a[href$=.pdf]")
+                val pdfUrl = pdfElement?.attr("href")
+
+                callback(pdfUrl)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                callback(null)
+            }
+        }.start()
     }
 
-    // Function to download and display PDF
+    // PDF’i indirip gösteren fonksiyon
     private fun downloadAndDisplayPDF(pdfUrl: String) {
-        progressBar.visibility = View.VISIBLE // Show ProgressBar before downloading
-
         val client = OkHttpClient()
         val request = Request.Builder().url(pdfUrl).build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
-                    progressBar.visibility = View.GONE // Hide ProgressBar on failure
+                    progressBar.visibility = View.GONE
                     Toast.makeText(applicationContext, "PDF yüklenemedi!", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -64,14 +120,14 @@ class NobetciEczaneler : AppCompatActivity() {
                     runOnUiThread {
                         pdfView.fromFile(file)
                             .enableSwipe(true)
-                            .swipeHorizontal(false) // Vertical scrolling
-                            .enableDoubletap(true) // Zoom with double tap
-                            .defaultPage(0) // Start on first page
-                            .spacing(10) // Space between pages
-                            .enableAntialiasing(true) // Smoother rendering
+                            .swipeHorizontal(false)
+                            .enableDoubletap(true)
+                            .defaultPage(0)
+                            .spacing(10)
+                            .enableAntialiasing(true)
                             .load()
 
-                        progressBar.visibility = View.GONE // Hide ProgressBar after loading
+                        progressBar.visibility = View.GONE
                     }
                 }
             }
