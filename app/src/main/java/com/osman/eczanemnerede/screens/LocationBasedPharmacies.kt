@@ -19,11 +19,11 @@ var latitude : Double = 0.0
 var longitude : Double = 0.0
 
 val nearbyPharmacies = ArrayList<CSVDataForLocation>()
-val dummyList = ArrayList<CSVDataForLocation>()
+
 
 class LocationBasedPharmacies : AppCompatActivity() {
 
-    private val LOCATION_PERMISSION_REQUEST_CODE = 123
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,14 +35,9 @@ class LocationBasedPharmacies : AppCompatActivity() {
         longitude = intent.getDoubleExtra("longitude",0.0)
 
 
-
-
-        //  val inputStream: InputStream = resources.openRawResource(R.raw.eczane)
         val reader = BufferedReader(InputStreamReader(inputStream))
         val pharmacies = parseCSVData(reader).sortedBy { it.distance }
 
-        //val reader = createCSVReader()
-        //val pharmacies = parseCSVData(reader).sortedBy { it.distance }
 
 
         println(pharmacies)
@@ -134,9 +129,5 @@ class LocationBasedPharmacies : AppCompatActivity() {
     }
 
 
-    private fun createCSVReader(): Reader {
-        val inputStream: InputStream = resources.openRawResource(R.raw.eczane)
-        return InputStreamReader(inputStream, Charsets.UTF_8)
-    }
 
 }

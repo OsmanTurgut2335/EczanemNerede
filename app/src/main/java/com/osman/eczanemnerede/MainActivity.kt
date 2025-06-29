@@ -134,7 +134,7 @@ class MainActivity : ComponentActivity() {
 
     }
     private fun setRefreshLayout() {
-        //TODO if location permission is given stop the refresh
+
         refreshLayout.setOnRefreshListener {
             // Always show the permission denied toast if there's no permission
             if (!LocationHelper.hasLocationPermissions(this)) {

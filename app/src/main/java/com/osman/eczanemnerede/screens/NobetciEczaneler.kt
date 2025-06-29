@@ -28,10 +28,10 @@ class NobetciEczaneler : AppCompatActivity() {
         pdfView = findViewById(R.id.pdfView)
         progressBar = findViewById(R.id.progressBar)
 
-        // 1. ProgressBar göster
+
         progressBar.visibility = View.VISIBLE
 
-        // 2. Güncel PDF bağlantısını al
+
         fetchLatestPdfUrl { pdfUrl ->
             runOnUiThread {
                 if (pdfUrl != null) {
@@ -44,7 +44,7 @@ class NobetciEczaneler : AppCompatActivity() {
         }
     }
 
-    // JSoup ile en güncel PDF linkini bulan fonksiyon
+    // function to fetch the most recent pharmacy list post in the website
     private fun fetchLatestPdfUrl(callback: (String?) -> Unit) {
         Thread {
             try {
@@ -58,7 +58,7 @@ class NobetciEczaneler : AppCompatActivity() {
 
                 val latestAnnouncementElement = doc.select(selector).first()
 
-                println("YARRRRRRRRRRRAK")
+
                 println(latestAnnouncementElement)
 
                 val detailUrl = latestAnnouncementElement?.attr("href")
@@ -79,13 +79,13 @@ class NobetciEczaneler : AppCompatActivity() {
                 }
 
 
-                println("YARRRRRRRRRRRAK")
+
                 println(fullDetailUrl)
 
-                // Duyuru detay sayfasını aç
+
                 val detailDoc = Jsoup.connect(fullDetailUrl).get()
 
-                // PDF linkini al
+                // get pd f link
                 val pdfElement = detailDoc.selectFirst("a[href$=.pdf]")
                 val pdfUrl = pdfElement?.attr("href")
 
@@ -97,7 +97,7 @@ class NobetciEczaneler : AppCompatActivity() {
         }.start()
     }
 
-    // PDF’i indirip gösteren fonksiyon
+
     private fun downloadAndDisplayPDF(pdfUrl: String) {
         val client = OkHttpClient()
         val request = Request.Builder().url(pdfUrl).build()
