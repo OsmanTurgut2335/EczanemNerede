@@ -1,5 +1,6 @@
 package com.osman.eczanemnerede
 import android.Manifest
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -30,6 +31,9 @@ import com.osman.eczanemnerede.screens.AllPharmacies
 import com.osman.eczanemnerede.screens.LocationBasedPharmacies
 import com.osman.eczanemnerede.screens.NobetciEczaneler
 import org.jsoup.Jsoup
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class MainActivity : ComponentActivity() {
@@ -297,11 +301,38 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    private fun intentToNobetci(){
-        val intent = Intent(this, NobetciEczaneler::class.java)
-        startActivity(intent)
+    private fun intentToNobetci() {
+        // 1. AlertDialog + ProgressBar oluştur
+        val progressView = layoutInflater.inflate(R.layout.dialog_loading, null)
+
+        val loadingDialog = AlertDialog.Builder(this)
+            .setView(progressView)
+            .setCancelable(false)
+            .create()
+
+        loadingDialog.show()
+
+        // 2. PDF linkini çek
+        fetchLatestPdfUrl { pdfUrl ->
+            runOnUiThread {
+                loadingDialog.dismiss() // loading kapat
+
+                val intent = Intent(this, NobetciEczaneler::class.java)
+
+                if (pdfUrl != null) {
+                    intent.putExtra("pdf_url", pdfUrl)
+                } else {
+                    intent.putExtra("error_message", "PDF bağlantısı bulunamadı!")
+                }
+
+                startActivity(intent)
+            }
+        }
     }
-     fun nobetciClicked(v: View){
+
+
+
+    fun nobetciClicked(v: View){
         intentToNobetci()
     }
 
@@ -314,5 +345,57 @@ class MainActivity : ComponentActivity() {
             .show()
     }
 
+    // function to fetch the most recent pharmacy list post in the website
+    private fun fetchLatestPdfUrl(callback: (String?) -> Unit) {
+        Thread {
+            try {
+                val doc = Jsoup.connect("https://keo.org.tr/kategori/nobetle-ilgili-462077/")
+                    .userAgent("Mozilla/5.0")
+                    .get()
+                val turkishLocale = Locale("tr", "TR")
+                val currentMonth = SimpleDateFormat("MMMM", turkishLocale).format(Date()).lowercase(turkishLocale)
+
+                val selector = "a[href*=-$currentMonth][href*=-nobetci-eczane]"
+
+                val latestAnnouncementElement = doc.select(selector).first()
+
+
+                println(latestAnnouncementElement)
+
+                val detailUrl = latestAnnouncementElement?.attr("href")
+
+
+                if (detailUrl == null) {
+                    callback(null)
+                    return@Thread
+                }
+
+                val rawHref = latestAnnouncementElement?.attr("href")
+
+                val fullDetailUrl = when {
+                    rawHref == null -> null
+                    rawHref.startsWith("http") -> rawHref
+                    rawHref.startsWith("/") -> "https://keo.org.tr$rawHref"
+                    else -> "https://keo.org.tr/$rawHref"  // ← işte burası eksik '/' varsa tamamlıyor
+                }
+
+
+
+                println(fullDetailUrl)
+
+
+                val detailDoc = Jsoup.connect(fullDetailUrl).get()
+
+                // get pd f link
+                val pdfElement = detailDoc.selectFirst("a[href$=.pdf]")
+                val pdfUrl = pdfElement?.attr("href")
+
+                callback(pdfUrl)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                callback(null)
+            }
+        }.start()
+    }
 
 }

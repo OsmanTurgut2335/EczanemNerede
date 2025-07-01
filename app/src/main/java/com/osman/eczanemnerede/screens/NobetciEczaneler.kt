@@ -8,12 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.github.barteksc.pdfviewer.PDFView
 import com.osman.eczanemnerede.R
 import okhttp3.*
-import org.jsoup.Jsoup
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class NobetciEczaneler : AppCompatActivity() {
 
@@ -21,84 +19,55 @@ class NobetciEczaneler : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nobetci_eczaneler)
 
         pdfView = findViewById(R.id.pdfView)
         progressBar = findViewById(R.id.progressBar)
 
+        val pdfUrl = intent.getStringExtra("pdf_url")
+        val errorMessage = intent.getStringExtra("error_message")
+
+        if (!errorMessage.isNullOrEmpty()) {
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        if (pdfUrl.isNullOrEmpty()) {
+            Toast.makeText(this, "Beklenmeyen hata", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        val currentMonth = SimpleDateFormat("MMMM", Locale("tr", "TR"))
+            .format(Date())
+            .lowercase(Locale("tr", "TR"))
+        val cachedFile = File(cacheDir, "nobetci_$currentMonth.pdf")
 
         progressBar.visibility = View.VISIBLE
 
-
-        fetchLatestPdfUrl { pdfUrl ->
-            runOnUiThread {
-                if (pdfUrl != null) {
-                    downloadAndDisplayPDF(pdfUrl)
-                } else {
-                    progressBar.visibility = View.GONE
-                    Toast.makeText(this, "PDF bağlantısı bulunamadı!", Toast.LENGTH_SHORT).show()
-                }
-            }
+        if (cachedFile.exists()) {
+            showPdfFromFile(cachedFile)
+        } else {
+            downloadAndDisplayPDF(pdfUrl, cachedFile)
         }
     }
 
-    // function to fetch the most recent pharmacy list post in the website
-    private fun fetchLatestPdfUrl(callback: (String?) -> Unit) {
-        Thread {
-            try {
-                val doc = Jsoup.connect("https://keo.org.tr/kategori/nobetle-ilgili-462077/")
-                    .userAgent("Mozilla/5.0")
-                    .get()
-                val turkishLocale = Locale("tr", "TR")
-                val currentMonth = SimpleDateFormat("MMMM", turkishLocale).format(Date()).lowercase(turkishLocale)
+    private fun showPdfFromFile(file: File) {
+        pdfView.fromFile(file)
+            .enableSwipe(true)
+            .swipeHorizontal(false)
+            .enableDoubletap(true)
+            .defaultPage(0)
+            .spacing(10)
+            .enableAntialiasing(true)
+            .load()
 
-                val selector = "a[href*=-$currentMonth][href*=-nobetci-eczane]"
-
-                val latestAnnouncementElement = doc.select(selector).first()
-
-
-                println(latestAnnouncementElement)
-
-                val detailUrl = latestAnnouncementElement?.attr("href")
-
-
-                if (detailUrl == null) {
-                    callback(null)
-                    return@Thread
-                }
-
-                val rawHref = latestAnnouncementElement?.attr("href")
-
-                val fullDetailUrl = when {
-                    rawHref == null -> null
-                    rawHref.startsWith("http") -> rawHref
-                    rawHref.startsWith("/") -> "https://keo.org.tr$rawHref"
-                    else -> "https://keo.org.tr/$rawHref"  // ← işte burası eksik '/' varsa tamamlıyor
-                }
-
-
-
-                println(fullDetailUrl)
-
-
-                val detailDoc = Jsoup.connect(fullDetailUrl).get()
-
-                // get pd f link
-                val pdfElement = detailDoc.selectFirst("a[href$=.pdf]")
-                val pdfUrl = pdfElement?.attr("href")
-
-                callback(pdfUrl)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                callback(null)
-            }
-        }.start()
+        progressBar.visibility = View.GONE
     }
 
-
-    private fun downloadAndDisplayPDF(pdfUrl: String) {
+    private fun downloadAndDisplayPDF(pdfUrl: String, targetFile: File) {
         val client = OkHttpClient()
         val request = Request.Builder().url(pdfUrl).build()
 
@@ -112,22 +81,12 @@ class NobetciEczaneler : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 response.body?.byteStream()?.use { inputStream ->
-                    val file = File(cacheDir, "temp.pdf")
-                    file.outputStream().use { output ->
+                    targetFile.outputStream().use { output ->
                         inputStream.copyTo(output)
                     }
 
                     runOnUiThread {
-                        pdfView.fromFile(file)
-                            .enableSwipe(true)
-                            .swipeHorizontal(false)
-                            .enableDoubletap(true)
-                            .defaultPage(0)
-                            .spacing(10)
-                            .enableAntialiasing(true)
-                            .load()
-
-                        progressBar.visibility = View.GONE
+                        showPdfFromFile(targetFile)
                     }
                 }
             }
